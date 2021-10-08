@@ -1,6 +1,6 @@
 {
   "name": "smiles-drawer-fork-continue",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "description": "A SMILES drawer and parser. Generate molecular structure depictions in pure JavaScript. (Forked)",
   "main": "./app.js",
   "repository": "https://github.com/rogerwq/smilesDrawer",
