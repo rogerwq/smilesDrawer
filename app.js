@@ -50,7 +50,11 @@ SmilesDrawer.apply = function(options, selector='canvas[data-smiles]', themeName
       let element = elements[i];
 
       SmilesDrawer.parse(element.getAttribute('data-smiles'), function(tree) {
-          smilesDrawer.draw(tree, element, themeName, false);
+        let numbering = [];
+        if (element.getAttribute('data-numbering')) {
+          numbering = JSON.parse(element.getAttribute('data-numbering'));
+        }
+        smilesDrawer.draw(tree, element, themeName, false, numbering); 
       }, function(err) {
         if (onError) {
           onError(err);

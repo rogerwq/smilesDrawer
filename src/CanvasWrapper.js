@@ -467,14 +467,14 @@ class CanvasWrapper {
      * @param {Number} y The y coordinate.
      * @param {String} text The debug text.
      */
-    drawDebugText(x, y, text) {
+    drawDebugText(x, y, text, color = '#ff0000') {
         let ctx = this.ctx;
 
         ctx.save();
         ctx.font = '5px Droid Sans, sans-serif';
         ctx.textAlign = 'start';
         ctx.textBaseline = 'top';
-        ctx.fillStyle = '#ff0000';
+        ctx.fillStyle = color; 
         ctx.fillText(text, x + this.offsetX, y + this.offsetY);
         ctx.restore();
     }

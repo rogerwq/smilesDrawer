@@ -153,7 +153,7 @@ class Drawer {
    * @param {String} themeName='dark' The name of the theme to use. Built-in themes are 'light' and 'dark'.
    * @param {Boolean} infoOnly=false Only output info on the molecule without drawing anything to the canvas.
    */
-  draw(data, target, themeName = 'light', infoOnly = false) {
+  draw(data, target, themeName = 'light', infoOnly = false, numbering = []) {
     this.initDraw(data, themeName, infoOnly);
 
     if (!this.infoOnly) {
@@ -169,7 +169,7 @@ class Drawer {
 
       // Do the actual drawing
       this.drawEdges(this.opts.debug);
-      this.drawVertices(this.opts.debug);
+      this.drawVertices(this.opts.debug, numbering);
       this.canvasWrapper.reset();
 
       if (this.opts.debug) {
@@ -1537,7 +1537,7 @@ class Drawer {
    *
    * @param {Boolean} debug A boolean indicating whether or not to draw debug messages to the canvas.
    */
-  drawVertices(debug) {
+  drawVertices(debug, numbering = [], numbering_color = '#000000') {
     var i = this.graph.vertices.length;
     for (var i = 0; i < this.graph.vertices.length; i++) {
       let vertex = this.graph.vertices[i];
@@ -1563,12 +1563,15 @@ class Drawer {
         isotope = atom.bracket.isotope;
       }
 
+      let numbering_y_offset = 5;
+
       if (this.opts.atomVisualization === 'allballs') {
         this.canvasWrapper.drawBall(vertex.position.x, vertex.position.y, element);
       } else if ((atom.isDrawn && (!isCarbon || atom.drawExplicit || isTerminal || atom.hasAttachedPseudoElements)) || this.graph.vertices.length === 1) {
         if (this.opts.atomVisualization === 'default') {
           this.canvasWrapper.drawText(vertex.position.x, vertex.position.y,
             element, hydrogens, dir, isTerminal, charge, isotope, atom.getAttachedPseudoElements());
+          numbering_y_offset = 8;
         } else if (this.opts.atomVisualization === 'balls') {
           this.canvasWrapper.drawBall(vertex.position.x, vertex.position.y, element);
         }
@@ -1588,6 +1591,10 @@ class Drawer {
         this.canvasWrapper.drawDebugText(vertex.position.x, vertex.position.y, value);
       } else {
         // this.canvasWrapper.drawDebugText(vertex.position.x, vertex.position.y, vertex.value.chirality);
+      }
+
+      if (numbering.length > 0 && i < numbering.length) {
+        this.canvasWrapper.drawDebugText(vertex.position.x, vertex.position.y - numbering_y_offset, ' ' + numbering[i], numbering_color);
       }
     }
 
