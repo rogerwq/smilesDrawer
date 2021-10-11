@@ -51,12 +51,19 @@ SmilesDrawer.apply = function (options, selector = 'canvas[data-smiles]', themeN
     let element = elements[i];
     SmilesDrawer.parse(element.getAttribute('data-smiles'), function (tree) {
       let numbering = [];
+      let numbering_directions = {};
 
       if (element.getAttribute('data-numbering')) {
         numbering = JSON.parse(element.getAttribute('data-numbering'));
       }
 
-      smilesDrawer.draw(tree, element, themeName, false, numbering);
+      if (element.getAttribute('data-numbering-directions')) {
+        console.log(element.getAttribute('data-numbering-directions'));
+        numbering_directions = JSON.parse(element.getAttribute('data-numbering-directions'));
+        console.log(numbering_directions);
+      }
+
+      smilesDrawer.draw(tree, element, themeName, false, numbering, numbering_directions);
     }, function (err) {
       if (onError) {
         onError(err);
@@ -1531,6 +1538,25 @@ class CanvasWrapper {
     ctx.restore();
   }
   /**
+   * Draws a numbering text message at a given position
+   *
+   * @param {Number} x The x coordinate.
+   * @param {Number} y The y coordinate.
+   * @param {String} text The debug text.
+   */
+
+
+  drawNumberingText(x, y, text, color = '#ff0000') {
+    let ctx = this.ctx;
+    ctx.save();
+    ctx.font = '5px Droid Sans, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = color;
+    ctx.fillText(text, x + this.offsetX, y + this.offsetY);
+    ctx.restore();
+  }
+  /**
    * Draw a ball to the canvas.
    *
    * @param {Number} x The x position of the text.
@@ -2091,7 +2117,7 @@ class Drawer {
    * @param {String} themeName='dark' The name of the theme to use. Built-in themes are 'light' and 'dark'.
    * @param {Boolean} infoOnly=false Only output info on the molecule without drawing anything to the canvas.
    */
-  draw(data, target, themeName = 'light', infoOnly = false, numbering = []) {
+  draw(data, target, themeName = 'light', infoOnly = false, numbering = [], numbering_directions = {}) {
     this.initDraw(data, themeName, infoOnly);
 
     if (!this.infoOnly) {
@@ -2105,7 +2131,7 @@ class Drawer {
       this.canvasWrapper.scale(this.graph.vertices); // Do the actual drawing
 
       this.drawEdges(this.opts.debug);
-      this.drawVertices(this.opts.debug, numbering);
+      this.drawVertices(this.opts.debug, numbering, numbering_directions);
       this.canvasWrapper.reset();
 
       if (this.opts.debug) {
@@ -3444,7 +3470,7 @@ class Drawer {
    */
 
 
-  drawVertices(debug, numbering = [], numbering_color = '#000000') {
+  drawVertices(debug, numbering = [], numbering_directions = {}, numbering_color = '#000000') {
     var i = this.graph.vertices.length;
 
     for (var i = 0; i < this.graph.vertices.length; i++) {
@@ -3470,14 +3496,11 @@ class Drawer {
         isotope = atom.bracket.isotope;
       }
 
-      let numbering_y_offset = 5;
-
       if (this.opts.atomVisualization === 'allballs') {
         this.canvasWrapper.drawBall(vertex.position.x, vertex.position.y, element);
       } else if (atom.isDrawn && (!isCarbon || atom.drawExplicit || isTerminal || atom.hasAttachedPseudoElements) || this.graph.vertices.length === 1) {
         if (this.opts.atomVisualization === 'default') {
           this.canvasWrapper.drawText(vertex.position.x, vertex.position.y, element, hydrogens, dir, isTerminal, charge, isotope, atom.getAttachedPseudoElements());
-          numbering_y_offset = 8;
         } else if (this.opts.atomVisualization === 'balls') {
           this.canvasWrapper.drawBall(vertex.position.x, vertex.position.y, element);
         }
@@ -3499,7 +3522,53 @@ class Drawer {
       }
 
       if (numbering.length > 0 && i < numbering.length) {
-        this.canvasWrapper.drawDebugText(vertex.position.x, vertex.position.y - numbering_y_offset, ' ' + numbering[i], numbering_color);
+        let numbering_offset = 4;
+        let numbering_offsetX = 0;
+        let numbering_offsetY = 0;
+
+        switch (numbering_directions[i]) {
+          case 'N':
+            numbering_offsetX = 0;
+            numbering_offsetY = -numbering_offset;
+            break;
+
+          case 'NE':
+            numbering_offsetX = numbering_offset;
+            numbering_offsetY = -numbering_offset;
+            break;
+
+          case 'E':
+            numbering_offsetX = numbering_offset;
+            numbering_offsetY = 0;
+            break;
+
+          case 'S':
+            numbering_offsetX = 0;
+            numbering_offsetY = numbering_offset;
+            break;
+
+          case 'SW':
+            numbering_offsetX = -numbering_offset;
+            numbering_offsetY = numbering_offset;
+            break;
+
+          case 'W':
+            numbering_offsetX = -numbering_offset;
+            numbering_offsetY = 0;
+            break;
+
+          case 'NW':
+            numbering_offsetX = -numbering_offset;
+            numbering_offsetY = -numbering_offset;
+            break;
+
+          default:
+            numbering_offsetX = numbering_offset;
+            numbering_offsetY = numbering_offset;
+            break;
+        }
+
+        this.canvasWrapper.drawNumberingText(vertex.position.x + numbering_offsetX, vertex.position.y + numbering_offsetY, '' + numbering[i], numbering_color);
       }
     } // Draw the ring centers for debug purposes
 

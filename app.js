@@ -51,10 +51,14 @@ SmilesDrawer.apply = function(options, selector='canvas[data-smiles]', themeName
 
       SmilesDrawer.parse(element.getAttribute('data-smiles'), function(tree) {
         let numbering = [];
+        let numbering_directions = {};
         if (element.getAttribute('data-numbering')) {
           numbering = JSON.parse(element.getAttribute('data-numbering'));
         }
-        smilesDrawer.draw(tree, element, themeName, false, numbering); 
+        if (element.getAttribute('data-numbering-directions')) {
+          numbering_directions = JSON.parse(element.getAttribute('data-numbering-directions'));
+        }
+        smilesDrawer.draw(tree, element, themeName, false, numbering, numbering_directions); 
       }, function(err) {
         if (onError) {
           onError(err);

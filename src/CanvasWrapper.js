@@ -480,6 +480,25 @@ class CanvasWrapper {
     }
 
     /**
+     * Draws a numbering text message at a given position
+     *
+     * @param {Number} x The x coordinate.
+     * @param {Number} y The y coordinate.
+     * @param {String} text The debug text.
+     */
+    drawNumberingText(x, y, text, color = '#ff0000') {
+        let ctx = this.ctx;
+
+        ctx.save();
+        ctx.font = '5px Droid Sans, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = color; 
+        ctx.fillText(text, x + this.offsetX, y + this.offsetY);
+        ctx.restore();
+    }
+
+    /**
      * Draw a ball to the canvas.
      *
      * @param {Number} x The x position of the text.
