@@ -498,6 +498,17 @@ class CanvasWrapper {
         ctx.restore();
     }
 
+    drawHighlight(x, y, radius, color = '#ff0000') {
+        let ctx = this.ctx;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(x + this.offsetX, y + this.offsetY, radius, 0, MathHelper.twoPI, false);
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.restore();
+    }
+
     /**
      * Draw a ball to the canvas.
      *

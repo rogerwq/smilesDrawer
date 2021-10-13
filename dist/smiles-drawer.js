@@ -52,18 +52,21 @@ SmilesDrawer.apply = function (options, selector = 'canvas[data-smiles]', themeN
     SmilesDrawer.parse(element.getAttribute('data-smiles'), function (tree) {
       let numbering = [];
       let numbering_directions = {};
+      let vertex_highlights = {};
 
       if (element.getAttribute('data-numbering')) {
         numbering = JSON.parse(element.getAttribute('data-numbering'));
       }
 
       if (element.getAttribute('data-numbering-directions')) {
-        console.log(element.getAttribute('data-numbering-directions'));
         numbering_directions = JSON.parse(element.getAttribute('data-numbering-directions'));
-        console.log(numbering_directions);
       }
 
-      smilesDrawer.draw(tree, element, themeName, false, numbering, numbering_directions);
+      if (element.getAttribute('data-vertex-highlights')) {
+        vertex_highlights = JSON.parse(element.getAttribute('data-vertex-highlights'));
+      }
+
+      smilesDrawer.draw(tree, element, themeName, false, numbering, numbering_directions, vertex_highlights);
     }, function (err) {
       if (onError) {
         onError(err);
@@ -1556,6 +1559,16 @@ class CanvasWrapper {
     ctx.fillText(text, x + this.offsetX, y + this.offsetY);
     ctx.restore();
   }
+
+  drawHighlight(x, y, radius, color = '#ff0000') {
+    let ctx = this.ctx;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(x + this.offsetX, y + this.offsetY, radius, 0, MathHelper.twoPI, false);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.restore();
+  }
   /**
    * Draw a ball to the canvas.
    *
@@ -2117,7 +2130,7 @@ class Drawer {
    * @param {String} themeName='dark' The name of the theme to use. Built-in themes are 'light' and 'dark'.
    * @param {Boolean} infoOnly=false Only output info on the molecule without drawing anything to the canvas.
    */
-  draw(data, target, themeName = 'light', infoOnly = false, numbering = [], numbering_directions = {}) {
+  draw(data, target, themeName = 'light', infoOnly = false, numbering = [], numbering_directions = {}, vertex_highlights = {}) {
     this.initDraw(data, themeName, infoOnly);
 
     if (!this.infoOnly) {
@@ -2131,7 +2144,7 @@ class Drawer {
       this.canvasWrapper.scale(this.graph.vertices); // Do the actual drawing
 
       this.drawEdges(this.opts.debug);
-      this.drawVertices(this.opts.debug, numbering, numbering_directions);
+      this.drawVertices(this.opts.debug, numbering, numbering_directions, "#ff0000", vertex_highlights);
       this.canvasWrapper.reset();
 
       if (this.opts.debug) {
@@ -3470,7 +3483,7 @@ class Drawer {
    */
 
 
-  drawVertices(debug, numbering = [], numbering_directions = {}, numbering_color = '#000000') {
+  drawVertices(debug, numbering = [], numbering_directions = {}, numbering_color = '#000000', vertex_highlights = {}) {
     var i = this.graph.vertices.length;
 
     for (var i = 0; i < this.graph.vertices.length; i++) {
@@ -3518,8 +3531,9 @@ class Drawer {
       if (debug) {
         let value = 'v: ' + vertex.id + ' ' + ArrayHelper.print(atom.ringbonds);
         this.canvasWrapper.drawDebugText(vertex.position.x, vertex.position.y, value);
-      } else {// this.canvasWrapper.drawDebugText(vertex.position.x, vertex.position.y, vertex.value.chirality);
-      }
+      } else {} // this.canvasWrapper.drawDebugText(vertex.position.x, vertex.position.y, vertex.value.chirality);
+      // draw numbering
+
 
       if (numbering.length > 0 && i < numbering.length) {
         let numbering_offset = 4;
@@ -3533,8 +3547,8 @@ class Drawer {
             break;
 
           case 'NE':
-            numbering_offsetX = numbering_offset;
-            numbering_offsetY = -numbering_offset;
+            numbering_offsetX = numbering_offset / 1.4;
+            numbering_offsetY = -numbering_offset / 1.4;
             break;
 
           case 'E':
@@ -3548,8 +3562,8 @@ class Drawer {
             break;
 
           case 'SW':
-            numbering_offsetX = -numbering_offset;
-            numbering_offsetY = numbering_offset;
+            numbering_offsetX = -numbering_offset / 1.4;
+            numbering_offsetY = numbering_offset / 1.4;
             break;
 
           case 'W':
@@ -3558,17 +3572,25 @@ class Drawer {
             break;
 
           case 'NW':
-            numbering_offsetX = -numbering_offset;
-            numbering_offsetY = -numbering_offset;
+            numbering_offsetX = -numbering_offset / 1.4;
+            numbering_offsetY = -numbering_offset / 1.4;
             break;
 
           default:
-            numbering_offsetX = numbering_offset;
-            numbering_offsetY = numbering_offset;
-            break;
+            numbering_offsetX = numbering_offset / 1.4;
+            numbering_offsetY = numbering_offset / 1.4;
         }
 
         this.canvasWrapper.drawNumberingText(vertex.position.x + numbering_offsetX, vertex.position.y + numbering_offsetY, '' + numbering[i], numbering_color);
+      } // draw highlight
+
+
+      switch (vertex_highlights[i]) {
+        case undefined:
+          break;
+
+        default:
+          this.canvasWrapper.drawHighlight(vertex.position.x, vertex.position.y, 5, vertex_highlights[i]);
       }
     } // Draw the ring centers for debug purposes
 

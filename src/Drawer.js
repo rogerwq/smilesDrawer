@@ -153,7 +153,7 @@ class Drawer {
    * @param {String} themeName='dark' The name of the theme to use. Built-in themes are 'light' and 'dark'.
    * @param {Boolean} infoOnly=false Only output info on the molecule without drawing anything to the canvas.
    */
-  draw(data, target, themeName = 'light', infoOnly = false, numbering = [], numbering_directions = {}) {
+  draw(data, target, themeName = 'light', infoOnly = false, numbering = [], numbering_directions = {}, vertex_highlights = {}) {
     this.initDraw(data, themeName, infoOnly);
 
     if (!this.infoOnly) {
@@ -169,7 +169,7 @@ class Drawer {
 
       // Do the actual drawing
       this.drawEdges(this.opts.debug);
-      this.drawVertices(this.opts.debug, numbering, numbering_directions);
+      this.drawVertices(this.opts.debug, numbering, numbering_directions, "#ff0000", vertex_highlights);
       this.canvasWrapper.reset();
 
       if (this.opts.debug) {
@@ -1537,7 +1537,7 @@ class Drawer {
    *
    * @param {Boolean} debug A boolean indicating whether or not to draw debug messages to the canvas.
    */
-  drawVertices(debug, numbering = [], numbering_directions = {}, numbering_color = '#000000') {
+  drawVertices(debug, numbering = [], numbering_directions = {}, numbering_color = '#000000', vertex_highlights = {}) {
     var i = this.graph.vertices.length;
     for (var i = 0; i < this.graph.vertices.length; i++) {
       let vertex = this.graph.vertices[i];
@@ -1590,22 +1590,29 @@ class Drawer {
         // this.canvasWrapper.drawDebugText(vertex.position.x, vertex.position.y, vertex.value.chirality);
       }
 
+      // draw numbering
       if (numbering.length > 0 && i < numbering.length) {
         let numbering_offset = 4;
         let numbering_offsetX = 0; 
         let numbering_offsetY = 0;  
         switch(numbering_directions[i]) {
           case 'N': numbering_offsetX = 0; numbering_offsetY = -numbering_offset; break;
-          case 'NE': numbering_offsetX = numbering_offset; numbering_offsetY = -numbering_offset; break;
+          case 'NE': numbering_offsetX = numbering_offset/1.4; numbering_offsetY = -numbering_offset/1.4; break;
           case 'E': numbering_offsetX = numbering_offset; numbering_offsetY = 0; break;
           case 'S': numbering_offsetX = 0; numbering_offsetY = numbering_offset; break;
-          case 'SW': numbering_offsetX = -numbering_offset; numbering_offsetY = numbering_offset; break;
+          case 'SW': numbering_offsetX = -numbering_offset/1.4; numbering_offsetY = numbering_offset/1.4; break;
           case 'W': numbering_offsetX = -numbering_offset; numbering_offsetY = 0; break;
-          case 'NW': numbering_offsetX = -numbering_offset; numbering_offsetY = -numbering_offset; break;
-          default: numbering_offsetX = numbering_offset; numbering_offsetY = numbering_offset; break;
+          case 'NW': numbering_offsetX = -numbering_offset/1.4; numbering_offsetY = -numbering_offset/1.4; break;
+          default: numbering_offsetX = numbering_offset/1.4; numbering_offsetY = numbering_offset/1.4; 
         }
 
         this.canvasWrapper.drawNumberingText(vertex.position.x + numbering_offsetX, vertex.position.y + numbering_offsetY, '' + numbering[i], numbering_color);
+      }
+
+      // draw highlight
+      switch(vertex_highlights[i]) {
+        case undefined: break;
+        default: this.canvasWrapper.drawHighlight(vertex.position.x, vertex.position.y, 5, vertex_highlights[i]);
       }
     }
 

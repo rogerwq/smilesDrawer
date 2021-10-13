@@ -52,13 +52,17 @@ SmilesDrawer.apply = function(options, selector='canvas[data-smiles]', themeName
       SmilesDrawer.parse(element.getAttribute('data-smiles'), function(tree) {
         let numbering = [];
         let numbering_directions = {};
+        let vertex_highlights = {};
         if (element.getAttribute('data-numbering')) {
           numbering = JSON.parse(element.getAttribute('data-numbering'));
         }
         if (element.getAttribute('data-numbering-directions')) {
           numbering_directions = JSON.parse(element.getAttribute('data-numbering-directions'));
         }
-        smilesDrawer.draw(tree, element, themeName, false, numbering, numbering_directions); 
+        if (element.getAttribute('data-vertex-highlights')) {
+          vertex_highlights = JSON.parse(element.getAttribute('data-vertex-highlights'));
+        }
+        smilesDrawer.draw(tree, element, themeName, false, numbering, numbering_directions, vertex_highlights); 
       }, function(err) {
         if (onError) {
           onError(err);
