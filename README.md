@@ -1,9 +1,13 @@
 This is a forked repo from [Smiles Drawer](https://github.com/reymond-group/smilesDrawer) version 1.2.0.
 
 ## How to build
-run `gulp` under the root directory.
+run `gulp build` under the root directory.
 
 ## Features Added
+
+### Adjust highlighted atom index for explicit hydrogen (0.0.4)
+- Substructure search results from other cheminformatic toolkit might not take into account the explicit hydrogens. Therefore the highlight atom index should be adjusted
+- add function `adjust_atom_index_for_explicit_H`
 
 ### Highlight the atoms (0.0.3) 
 - call from code `smilesDrawer.draw(tree, "example-canvas", "light", false, [1, 2, 3], {0: "N", 1: "NW"})`

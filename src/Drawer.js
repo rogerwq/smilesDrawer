@@ -13,6 +13,19 @@ const Graph = require('./Graph')
 const SSSR = require('./SSSR')
 const ThemeManager = require('./ThemeManager')
 
+function adjust_atom_index_for_explicit_H(eHIdx, vertex_highlights) {
+  var new_highlights = {};
+  for (var key in vertex_highlights) {
+    if (parseInt(key) >= eHIdx) {
+      new_highlights[String(parseInt(key)+1)] = vertex_highlights[key];
+    } else {
+      new_highlights[key] = vertex_highlights[key];
+    }
+  }
+
+  return new_highlights;
+}
+
 /** 
  * The main class of the application representing the smiles drawer 
  * 
@@ -166,6 +179,16 @@ class Drawer {
 
       // Set the canvas to the appropriate size
       this.canvasWrapper.scale(this.graph.vertices);
+
+      // adjust highlight atom index 
+      for (var i = 0; i < this.graph.vertices.length; i++) {
+        let vertex = this.graph.vertices[i];
+        let atom = vertex.value;
+        let element = atom.element;
+        if (element === 'H') {
+          vertex_highlights = adjust_atom_index_for_explicit_H(i, vertex_highlights);
+        }
+      }
 
       // Do the actual drawing
       this.drawEdges(this.opts.debug);
